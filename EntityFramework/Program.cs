@@ -5,12 +5,15 @@ using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
+// ----- Context factory, see line 112 -----
+
 var factory = new CookbookContextFactory();
 
 await using var context = factory.CreateDbContext(args);
 {
-    Console.WriteLine("Add Porridge");
+    // ----- Add records to db -----
     
+    Console.WriteLine("Add Porridge"); // <-- create a record
     var porridge = new Dish
     {
         Title = "Porridge",
@@ -18,11 +21,15 @@ await using var context = factory.CreateDbContext(args);
         Starts = 4
     };
 
-    context.Dishes.Add(porridge);
+    context.Dishes.Add(porridge); // <-- add a record
     await context.SaveChangesAsync();
-    
-    Console.WriteLine($"Added Porridge (id = {porridge.Id}) successfully");
 
+    Console.WriteLine($"Added Porridge (id = {porridge.Id}) successfully"); // <-- the state of the record is updated
+
+    // ----------------------------------
+    
+    // ----- Get data from db -----
+    
     Console.WriteLine("Checking stars for Porridge");
     var dishes = await context.Dishes.Where(dish => dish.Title.Contains("Porridge")).ToListAsync();
 
@@ -31,16 +38,28 @@ await using var context = factory.CreateDbContext(args);
         Console.WriteLine("Found some dishes!");
     }
     
+    // ----------------------------------
+    
+    // ----- Update records in db -----
+    
     Console.WriteLine("Change porridge stars for 5");
     porridge.Starts = 5;
     await context.SaveChangesAsync();
     Console.WriteLine("Changed stars");
     
+    // ----------------------------------
+    
+    // ----- Delete records from db -----
+    
     Console.WriteLine("Removing porridge");
     context.Dishes.Remove(porridge);
     await context.SaveChangesAsync();
     Console.WriteLine("Porridge removed");
+    
+    // ----------------------------------
 }
+
+// ----- Model1 -----
 
 class Dish
 {
@@ -56,6 +75,8 @@ class Dish
 
     public List<DishIngredient> Ingredients { get; set; } = new();
 }
+
+// ----- Model2 -----
 
 class DishIngredient
 {
@@ -74,15 +95,19 @@ class DishIngredient
     public int DishId { get; set; }
 }
 
+// ----- Connection string (a.k.a. context) -----
+
 class CookbookContext : DbContext
 {
-    public DbSet<Dish> Dishes { get; set; }
+    public DbSet<Dish> Dishes { get; set; } = null!;
 
-    public DbSet<DishIngredient> Ingredients { get; set; }
+    public DbSet<DishIngredient> Ingredients { get; set; } = null!;
 
     public CookbookContext(DbContextOptions<CookbookContext> options) : base(options)
     { }
 }
+
+// ----- Context factory: only needed for console projects ----- 
 
 class CookbookContextFactory : IDesignTimeDbContextFactory<CookbookContext>
 {
@@ -93,7 +118,7 @@ class CookbookContextFactory : IDesignTimeDbContextFactory<CookbookContext>
         var optionsBuilder = new DbContextOptionsBuilder<CookbookContext>();
         optionsBuilder
             .UseLoggerFactory(LoggerFactory.Create(builder => builder.AddConsole()))
-            .UseSqlServer(configuration["ConnectionStrings:DefaultConnection"]);
+            .UseSqlServer(configuration["ConnectionStrings:DefaultConnection"]!);
 
         return new CookbookContext(optionsBuilder.Options);
     }
