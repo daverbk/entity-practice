@@ -1,66 +1,170 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics;
+using System.Linq.Expressions;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
-// ----- Context factory, see line 112 -----
-
 var factory = new CookbookContextFactory();
 
-await using var context = factory.CreateDbContext(args);
+await EntityStates(factory);
+await ChangeTracking(factory);
+await AttachEntities(factory);
+await NoTracking(factory);
+await RawSql(factory);
+await Transactions(factory);
+await ExpressionTree(factory);
+
+static async Task EntityStates(CookbookContextFactory factory)
 {
-    // ----- Add records to db -----
+    await using var dbContext = factory.CreateDbContext();
     
-    Console.WriteLine("Add Porridge"); // <-- create a record
-    var porridge = new Dish
-    {
-        Title = "Porridge",
-        Notes = "This is a great dish",
-        Starts = 4
+    var newDish = new Dish {
+        Title = "Foo",
+        Notes = "Bar"
     };
 
-    context.Dishes.Add(porridge); // <-- add a record
-    await context.SaveChangesAsync();
+    var state = dbContext.Entry(newDish).State; // << Detached
 
-    Console.WriteLine($"Added Porridge (id = {porridge.Id}) successfully"); // <-- the state of the record is updated
+    dbContext.Dishes.Add(newDish);
+    state = dbContext.Entry(newDish).State; // << Added 
 
-    // ----------------------------------
-    
-    // ----- Get data from db -----
-    
-    Console.WriteLine("Checking stars for Porridge");
-    var dishes = await context.Dishes.Where(dish => dish.Title.Contains("Porridge")).ToListAsync();
+    await dbContext.SaveChangesAsync(); 
+    state = dbContext.Entry(newDish).State; // << Unchanged
 
-    if (dishes.Count == 1)
-    {
-        Console.WriteLine("Found some dishes!");
-    }
-    
-    // ----------------------------------
-    
-    // ----- Update records in db -----
-    
-    Console.WriteLine("Change porridge stars for 5");
-    porridge.Starts = 5;
-    await context.SaveChangesAsync();
-    Console.WriteLine("Changed stars");
-    
-    // ----------------------------------
-    
-    // ----- Delete records from db -----
-    
-    Console.WriteLine("Removing porridge");
-    context.Dishes.Remove(porridge);
-    await context.SaveChangesAsync();
-    Console.WriteLine("Porridge removed");
-    
-    // ----------------------------------
+    newDish.Notes = "Baz";
+    state = dbContext.Entry(newDish).State; // << Modified
+
+    dbContext.Dishes.Remove(newDish);
+    state = dbContext.Entry(newDish).State; // << Deleted
+
+    await dbContext.SaveChangesAsync();
+    state = dbContext.Entry(newDish).State; // << Detached
 }
 
-// ----- Model1 -----
+static async Task ChangeTracking(CookbookContextFactory factory)
+{
+    await using var dbContext = factory.CreateDbContext();
+    
+    var newDish = new Dish {
+        Title = "Foo",
+        Notes = "Bar"
+    };
+    
+    dbContext.Dishes.Add(newDish);
+    await dbContext.SaveChangesAsync(); 
+    newDish.Notes = "Baz";
 
+    var entry = dbContext.Entry(newDish);
+
+    var originalValue = entry.OriginalValues[nameof(Dish.Notes)]!.ToString();
+    var dishFromDatabase = await dbContext.Dishes.SingleAsync(d => d.Id == newDish.Id);
+
+    await using var dbContext2 = factory.CreateDbContext();
+    var dishFromDatabase2 = await dbContext2.Dishes.SingleAsync(d => d.Id == newDish.Id);
+}
+
+static async Task AttachEntities(CookbookContextFactory factory)
+{
+    await using var dbContext = factory.CreateDbContext();
+    
+    var newDish = new Dish {
+        Title = "Foo",
+        Notes = "Bar"
+    };
+    
+    dbContext.Dishes.Add(newDish);
+    await dbContext.SaveChangesAsync();
+    
+    // EF: Forget the "newDish" object
+    dbContext.Entry(newDish).State = EntityState.Detached;
+    var state = dbContext.Entry(newDish).State;
+
+    dbContext.Dishes.Update(newDish);
+    await dbContext.SaveChangesAsync();
+}
+
+static async Task NoTracking(CookbookContextFactory factory)
+{
+    using var dbContext = factory.CreateDbContext();
+
+    // SELECT * FROM Dishes
+    var dishes = await dbContext.Dishes.AsNoTracking().ToArrayAsync();
+    var state = dbContext.Entry(dishes[0]).State;
+}
+
+static async Task RawSql(CookbookContextFactory factory)
+{
+    await using var dbContext = factory.CreateDbContext();
+
+    var dishes = await dbContext.Dishes
+        .FromSqlRaw("SELECT * FROM Dishes")
+        .ToArrayAsync();
+    
+    var filter = "%z";
+    dishes = await dbContext.Dishes
+        .FromSqlInterpolated($"SELECT * FROM Dishes WHERE Notes LIKE {filter}")
+        .ToArrayAsync();
+
+    // BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD 
+    // BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD 
+    // BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD 
+    // BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD 
+    // SQL Injection 
+    dishes = await dbContext.Dishes
+        .FromSqlRaw("SELECT * FROM Dishes WHERE Notes LIKE '" + filter + "'")
+        .ToArrayAsync();
+
+    await dbContext.Database.ExecuteSqlRawAsync("DELETE FROM Dishes WHERE Id NOT IN (SELECT DishId FROM Ingredients)");
+}
+
+static async Task Transactions(CookbookContextFactory factory)
+{
+    await using var dbContext = factory.CreateDbContext();
+
+    await using var transaction = await dbContext.Database.BeginTransactionAsync();
+
+    try
+    {
+        dbContext.Dishes.Add(new Dish { Title = "Foo", Notes = "Bar" });
+        await dbContext.SaveChangesAsync();
+
+        await dbContext.Database.ExecuteSqlRawAsync("SELECT 1/0 as Bad");
+        await transaction.CommitAsync();
+    }
+    catch (SqlException ex)
+    {
+        Debug.WriteLine($"Something bad happened: {ex.Message}");
+    }
+}
+
+static async Task ExpressionTree(CookbookContextFactory factory)
+{
+    await using var dbContext = factory.CreateDbContext();
+    var newDish = new Dish { Title = "Foo", Notes = "Bar" };
+    dbContext.Dishes.Add(newDish);
+    await dbContext.SaveChangesAsync();
+
+    var dishes = await dbContext.Dishes
+        .Where(d => d.Title.StartsWith("F"))
+        .ToArrayAsync();
+
+    Func<Dish, bool> f = d => d.Title.StartsWith("F");
+    Expression<Func<Dish, bool>> ex = d => d.Title.StartsWith("F");
+
+    var inMemoryDishes = new[]
+    {
+        new Dish { Title = "Foo", Notes = "Bar" },
+        new Dish { Title = "Foo", Notes = "Bar" }
+    };
+
+    dishes = inMemoryDishes
+        .Where(d => d.Title.StartsWith("F"))
+        .ToArray();
+}
 class Dish
 {
     public int Id { get; set; }
@@ -75,8 +179,6 @@ class Dish
 
     public List<DishIngredient> Ingredients { get; set; } = new();
 }
-
-// ----- Model2 -----
 
 class DishIngredient
 {
@@ -95,8 +197,6 @@ class DishIngredient
     public int DishId { get; set; }
 }
 
-// ----- Connection string (a.k.a. context) -----
-
 class CookbookContext : DbContext
 {
     public DbSet<Dish> Dishes { get; set; } = null!;
@@ -106,8 +206,6 @@ class CookbookContext : DbContext
     public CookbookContext(DbContextOptions<CookbookContext> options) : base(options)
     { }
 }
-
-// ----- Context factory: only needed for console projects ----- 
 
 class CookbookContextFactory : IDesignTimeDbContextFactory<CookbookContext>
 {
@@ -123,5 +221,3 @@ class CookbookContextFactory : IDesignTimeDbContextFactory<CookbookContext>
         return new CookbookContext(optionsBuilder.Options);
     }
 }
-
-
