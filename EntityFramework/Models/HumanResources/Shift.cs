@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace EF.models;
+namespace EF.Models.HumanResources;
 
 [Table("Shift", Schema = "HumanResources")]
 public class Shift

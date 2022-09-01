@@ -68,8 +68,6 @@ await using var context = factory.CreateDbContext();
 
         Console.WriteLine($"Shifts count: {shiftsCount}");
 
-        var filterTimeSpan = new TimeSpan(23,30,0);
-        
         var nightShiftHours = await context
             .Shift
             .Where(shift => shift.Name.Contains("Night"))
@@ -77,5 +75,52 @@ await using var context = factory.CreateDbContext();
             .FirstAsync();
 
         Console.WriteLine($"Night shift starting hour: {nightShiftHours.StartTime} ending hour: {nightShiftHours.EndTime}");
+    }
+
+    {
+        var addressesCount = context
+            .Address
+            .Count();
+
+        Console.WriteLine($"Shifts count: {addressesCount}");
+
+        var countOfAddressesInBothell = await context
+            .Address
+            .Where(address => address.City.Contains("Bothell"))
+            .CountAsync();
+        
+        Console.WriteLine($"Addresses count in Bothell: {countOfAddressesInBothell}");
+    }
+    
+    {
+        var addressTypesCount = context
+            .AddressType
+            .Count();
+
+        Console.WriteLine($"Shifts count: {addressTypesCount}");
+
+        var primaryAddressType = await context
+            .AddressType
+            .FirstAsync(type => type.Name.Contains("Primary"));
+
+        Console.WriteLine($"Primary address type id: {primaryAddressType.AddressTypeID}");
+    }
+    
+    {
+        var businessEntitiesCount = context
+            .BusinessEntity
+            .Count();
+
+        Console.WriteLine($"Shifts count: {businessEntitiesCount}");
+
+        var businessEntityByGuid = await context
+            .BusinessEntity
+            .FirstAsync(type => type.rowguid.Equals(new Guid("0f3cc1d7-f484-4bde-b088-b11ef03e2f52")));
+
+        Console.WriteLine($"Primary address type id: {businessEntityByGuid.BusinessEntityID}");
+    }
+
+    {
+        
     }
 }

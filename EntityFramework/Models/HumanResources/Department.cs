@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace EF.models;
+namespace EF.Models.HumanResources;
 
 [Table("Department", Schema = "HumanResources")]
 public class Department

@@ -1,8 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Xml;
 
-namespace EF.models;
+namespace EF.Models.HumanResources;
 
 [Table("JobCandidate", Schema = "HumanResources")]
 public class JobCandidate
