@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EF.Models.Production;
@@ -5,6 +6,7 @@ namespace EF.Models.Production;
 [Table("BillOfMaterials", Schema = "Production")]
 public class BillOfMaterials
 {
+    [Key]
     public int AddressID { get; set; }
 
     public string AddressLine1 { get; set; } = string.Empty;

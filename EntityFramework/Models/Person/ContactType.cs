@@ -5,9 +5,9 @@ namespace EF.Models.Person;
 [Table("ContactType", Schema = "Person")]
 public class ContactType
 {
-    public int BusinessEntityID { get; set; }
+    public int ContactTypeID { get; set; }
 
-    public Guid rowguid { get; set; }
+    public string Name { get; set; }
 
     public DateTime ModifiedDate { get; set; }
 }

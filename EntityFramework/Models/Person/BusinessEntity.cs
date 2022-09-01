@@ -7,7 +7,8 @@ public class BusinessEntity
 {
     public int BusinessEntityID { get; set; }
 
-    public Guid rowguid { get; set; }
+    [Column("rowguid")]
+    public Guid RowGuid { get; set; }
 
     public DateTime ModifiedDate { get; set; }
 }

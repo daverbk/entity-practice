@@ -115,7 +115,7 @@ await using var context = factory.CreateDbContext();
 
         var businessEntityByGuid = await context
             .BusinessEntity
-            .FirstAsync(type => type.rowguid.Equals(new Guid("0f3cc1d7-f484-4bde-b088-b11ef03e2f52")));
+            .FirstAsync(type => type.RowGuid.Equals(new Guid("0f3cc1d7-f484-4bde-b088-b11ef03e2f52")));
 
         Console.WriteLine($"Primary address type id: {businessEntityByGuid.BusinessEntityID}");
     }
