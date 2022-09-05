@@ -7,11 +7,17 @@ namespace EF.Models.Person;
 public class BusinessEntityAddress
 {
     [Key]
-    public int BusinessEntityID { get; set; }
+    [ForeignKey(nameof(BusinessEntityAddress))]
+    [Column("BusinessEntityID")]
+    public int BusinessEntityId { get; set; }
     
-    public int AddressID { get; set; }
+    [ForeignKey(nameof(BusinessEntityAddress))]
+    [Column("AddressID")]
+    public int AddressI { get; set; }
     
-    public int AddressTypeID { get; set; }
+    [ForeignKey(nameof(BusinessEntityAddress))]
+    [Column("AddressTypeID")]
+    public int AddressTypeId { get; set; }
 
     [Column("rowguid")]
     public Guid RowGuid { get; set; }

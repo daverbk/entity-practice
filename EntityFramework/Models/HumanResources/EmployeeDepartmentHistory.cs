@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using EF.Models.Person;
 
 namespace EF.Models.HumanResources;
 
@@ -7,11 +8,17 @@ namespace EF.Models.HumanResources;
 public class EmployeeDepartmentHistory
 {
     [Key]
-    public int BusinessEntityID { get; set; }
+    [ForeignKey(nameof(BusinessEntity))]
+    [Column("BusinessEntityID")]
+    public int BusinessEntityId { get; set; }
 
-    public short DepartmentID { get; set; } 
+    [ForeignKey(nameof(Department))]
+    [Column("DepartmentID")]
+    public short DepartmentId { get; set; } 
 
-    public byte ShiftID { get; set; } 
+    [ForeignKey(nameof(Shift))]
+    [Column("ShiftID")]
+    public byte ShiftId { get; set; } 
 
     public DateTime StartDate { get; set; }
 

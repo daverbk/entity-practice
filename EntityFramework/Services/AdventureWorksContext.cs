@@ -1,8 +1,5 @@
 using EF.Models.HumanResources;
 using EF.Models.Person;
-using EF.Models.Production;
-using EF.Models.Purchasing;
-using EF.Models.Sales;
 using Microsoft.EntityFrameworkCore;
 
 namespace EF.services;
@@ -29,21 +26,26 @@ public class AdventureWorksContext : DbContext
     
     public DbSet<BusinessEntityContact> BusinessEntityContact { get; set; } = null!;
     
-    // public DbSet<ContactType> ContactType { get; set; } = null!;
-    //
-    // public DbSet<CountryRegion> CountryRegion { get; set; } = null!;
-    //
-    // public DbSet<EmailAddress> EmailAddress { get; set; } = null!;
-    //
-    // public DbSet<Password> Password { get; set; } = null!;
-    //
-    // public DbSet<Person> Person { get; set; } = null!;
-    //
-    // public DbSet<PersonPhone> PersonPhone { get; set; } = null!;
-    //
-    // public DbSet<PhoneNumberType> PhoneNumberType { get; set; } = null!; 
-    //
-    // public DbSet<StateProvince> StateProvince { get; set; } = null!;
+    public DbSet<ContactType> ContactType { get; set; } = null!;
+    
+    public DbSet<CountryRegion> CountryRegion { get; set; } = null!;
+    
+    public DbSet<EmailAddress> EmailAddress { get; set; } = null!;
+    
+    public DbSet<Password> Password { get; set; } = null!;
+    
+    public DbSet<Person> Person { get; set; } = null!;
+    
+    public DbSet<PersonPhone> PersonPhone { get; set; } = null!;
+    
+    public DbSet<PhoneNumberType> PhoneNumberType { get; set; } = null!; 
+    
+    public DbSet<StateProvince> StateProvince { get; set; } = null!;
+    
+    public AdventureWorksContext(DbContextOptions<AdventureWorksContext> options) : base(options)
+    { }
+    
+    // The rest of the tables that could be implemented. I didn't do that for the sake of time-saving.
     //
     // public DbSet<BillOfMaterials> BillOfMaterials { get; set; } = null!;
     //
@@ -134,7 +136,4 @@ public class AdventureWorksContext : DbContext
     // public DbSet<SpecialOfferProduct> SpecialOfferProduct { get; set; } = null!;
     //
     // public DbSet<Store> Store { get; set; } = null!;
-    
-    public AdventureWorksContext(DbContextOptions<AdventureWorksContext> options) : base(options)
-    { }
 }

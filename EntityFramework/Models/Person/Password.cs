@@ -7,12 +7,14 @@ namespace EF.Models.Person;
 public class Password
 {
     [Key]
-    public int BusinessEntityID { get; set; }
+    [ForeignKey(nameof(Person))]
+    [Column("BusinessEntityID")]
+    public int BusinessEntityId { get; set; }
     
-    public string PasswordHash { get; set; }
+    public string PasswordHash { get; set; } = string.Empty;
 
-    public string PasswordSalt { get; set; }
-
+    public string PasswordSalt { get; set; } = string.Empty;
+    
     [Column("rowguid")]
     public Guid RowGuid { get; set; }
 

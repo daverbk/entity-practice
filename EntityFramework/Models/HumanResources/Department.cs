@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EF.Models.HumanResources;
@@ -5,7 +6,9 @@ namespace EF.Models.HumanResources;
 [Table("Department", Schema = "HumanResources")]
 public class Department
 {
-    public short DepartmentID { get; set; }
+    [Key]
+    [Column("DepartmentID")]
+    public short DepartmentId { get; set; }
 
     public string Name { get; set; } = string.Empty;
     

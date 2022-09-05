@@ -7,27 +7,28 @@ namespace EF.Models.Person;
 public class Person
 {
     [Key]
-    public int BusinessEntityID { get; set; }
+    [Column("BusinessEntityID")]
+    public int BusinessEntityId { get; set; }
+     
+    public string PersonType { get; set; } = string.Empty;
+
+    public bool NameStyle { get; set; } 
     
-    public int PersonType { get; set; }
+    public string? Title { get; set; }
     
-    public int NameStyle { get; set; }
+    public string FirstName { get; set; } = string.Empty;
     
-    public int Title { get; set; }
+    public string? MiddleName { get; set; }
+
+    public string LastName { get; set; } = string.Empty;
     
-    public int FirstName { get; set; }
-    
-    public int MiddleName { get; set; }
-    
-    public int LastName { get; set; }
-    
-    public int Suffix { get; set; }
+    public string? Suffix { get; set; }
     
     public int EmailPromotion { get; set; }
     
-    public int AdditionalContactInfo { get; set; }
-    
-    public int Demographics { get; set; }
+    public string? AdditionalContactInfo { get; set; }
+
+    public string? Demographics { get; set; }
 
     [Column("rowguid")]
     public Guid RowGuid { get; set; }

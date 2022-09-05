@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EF.Models.Person;
@@ -5,7 +6,9 @@ namespace EF.Models.Person;
 [Table("BusinessEntity", Schema = "Person")]
 public class BusinessEntity
 {
-    public int BusinessEntityID { get; set; }
+    [Key]
+    [Column("BusinessEntityID")]
+    public int BusinessEntityId { get; set; }
 
     [Column("rowguid")]
     public Guid RowGuid { get; set; }

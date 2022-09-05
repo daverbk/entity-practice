@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EF.Models.Person;
@@ -5,10 +6,14 @@ namespace EF.Models.Person;
 [Table("EmailAddress", Schema = "Person")]
 public class EmailAddress
 {
-    public int BusinessEntityID { get; set; }
-    
-    public int EmailAddressID { get; set; }
+    [Key]
+    [Column("EmailAddressID")]
+    public int EmailAddressId { get; set; }
 
+    [ForeignKey(nameof(Person))]
+    [Column("BusinessEntityID")]
+    public int BusinessEntityId { get; set; }
+    
     [Column("EmailAddress")] 
     public string Address { get; set; } = string.Empty;
 

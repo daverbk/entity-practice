@@ -7,9 +7,9 @@ namespace EF.Models.Person;
 public class CountryRegion
 {
     [Key]
-    public string CountryRegionCode { get; set; }
+    public string CountryRegionCode { get; set; } = string.Empty;
 
-    public string Name { get; set; }
+    public string Name { get; set; } = string.Empty;
 
     public DateTime ModifiedDate { get; set; }
 }

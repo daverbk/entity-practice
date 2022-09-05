@@ -7,8 +7,9 @@ namespace EF.Models.HumanResources;
 public class Shift
 {
     [Key]
-    public byte ShiftID { get; set; }
-
+    [Column("ShiftID")]
+    public byte ShiftId { get; set; }
+    
     public string Name { get; set; } = string.Empty;
 
     public TimeSpan StartTime { get; set; }

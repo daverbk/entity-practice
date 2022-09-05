@@ -7,9 +7,10 @@ namespace EF.Models.Person;
 public class PhoneNumberType
 {
     [Key]
-    public int BusinessEntityID { get; set; }
-
-    public Guid rowguid { get; set; }
+    [Column("PhoneNumberTypeID")]
+    public int PhoneNumberTypeId { get; set; }
+    
+    public string Name { get; set; } = string.Empty;
 
     public DateTime ModifiedDate { get; set; }
 }

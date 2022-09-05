@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EF.Models.Person;
@@ -5,7 +6,9 @@ namespace EF.Models.Person;
 [Table("Address", Schema = "Person")]
 public class Address
 {
-    public int AddressID { get; set; }
+    [Key]
+    [Column("AddressID")]
+    public int AddressId { get; set; }
 
     public string AddressLine1 { get; set; } = string.Empty;
     
@@ -13,7 +16,9 @@ public class Address
 
     public string City { get; set; } = string.Empty;
     
-    public int StateProvinceID { get; set; }
+    [ForeignKey(nameof(StateProvince))]
+    [Column("StateProvinceID")]
+    public int StateProvinceId { get; set; }
 
     public string PostalCode { get; set; } = string.Empty;
 

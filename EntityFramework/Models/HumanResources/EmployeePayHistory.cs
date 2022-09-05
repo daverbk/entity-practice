@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using EF.Models.Person;
 
 namespace EF.Models.HumanResources;
 
@@ -7,8 +8,10 @@ namespace EF.Models.HumanResources;
 public class EmployeePayHistory
 {
     [Key]
-    public int BusinessEntityID { get; set; }
-    
+    [ForeignKey(nameof(BusinessEntity))]
+    [Column("BusinessEntityID")]
+    public int BusinessEntityId { get; set; }
+
     public DateTime RateChangeDate { get; set; }
     
     [Column(TypeName = "money")]

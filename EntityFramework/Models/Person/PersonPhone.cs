@@ -7,9 +7,15 @@ namespace EF.Models.Person;
 public class PersonPhone
 {
     [Key]
-    public int BusinessEntityID { get; set; }
+    [ForeignKey(nameof(Person))]
+    [Column("BusinessEntityID")]
+    public int BusinessEntityId { get; set; }
 
-    public Guid rowguid { get; set; }
+    public string PhoneNumber { get; set; } = string.Empty;
+    
+    [ForeignKey(nameof(PhoneNumberType))]
+    [Column("PhoneNumberTypeID")]
+    public int PhoneNumberTypeId { get; set; }
 
     public DateTime ModifiedDate { get; set; }
 }
